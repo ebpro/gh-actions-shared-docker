@@ -1,15 +1,7 @@
-name: CI
+name: Docker QEMI Shareable CI
 
 on:
-  workflow_dispatch:
-  schedule:
-    - cron: '0 02 * * *'    
-  push:
-    branches:
-      - 'releases/v*'
-      - 'develop'
-    tags:
-      - 'v*.*.*'
+    workflow_call:
 
 env:
   MSTEAMS_WEBHOOK: ${{ secrets.MSTEAMS_WEBHOOK }}      
