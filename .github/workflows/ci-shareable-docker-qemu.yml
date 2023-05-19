@@ -1,7 +1,12 @@
-name: Docker QEMI Shareable CI
+name: Docker QEMU Shareable CI
 
 on:
     workflow_call:
+       env-list:
+          description: list of env to produce as json array
+          required: false
+          default: '[ "" ]'
+          type: string
 
 env:
   MSTEAMS_WEBHOOK: ${{ secrets.MSTEAMS_WEBHOOK }}      
@@ -14,7 +19,7 @@ jobs:
   build:
     strategy:
        matrix:
-         ENV: ["", "minimal"]
+         ENV: ${{ fromJSON( inputs.env-list ) }}
     env:
        ENV: ${{ matrix.ENV }}
     runs-on: [self-hosted, qemu]
