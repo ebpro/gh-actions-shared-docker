@@ -85,9 +85,9 @@ jobs:
             [registry."${{ secrets.DOCKERHUB_PROXY_HOSTNAME }}"]
               http = true              
               insecure = true
-#            [registry."${{ secrets.PRIVATEHUB_HOSTNAME }}"]
-#              http = true
-#              insecure = true
+            [registry."${{ secrets.PRIVATEHUB_HOSTNAME }}"]
+              http = true
+              insecure = true
           driver-opts: |
             network=host
           buildkitd-flags: |
@@ -105,8 +105,8 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          #cache-from: type=registry,ref=${{ secrets.PRIVATEHUB_HOSTNAME }}/${{ env.REPOSITORY_NAME }}:buildcache
-          # -to: type=registry,ref=${{ secrets.PRIVATEHUB_HOSTNAME }}/${{ env.REPOSITORY_NAME }}:buildcache,mode=min,compression=zstd
+          cache-from: type=registry,ref=${{ secrets.PRIVATEHUB_HOSTNAME }}/${{ env.REPOSITORY_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ secrets.PRIVATEHUB_HOSTNAME }}/${{ env.REPOSITORY_NAME }}:buildcache,mode=min,compression=zstd
             
       - name: Update repo description
         uses: peter-evans/dockerhub-description@v4
