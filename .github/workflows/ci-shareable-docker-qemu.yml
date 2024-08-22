@@ -105,9 +105,17 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ secrets.PRIVATEHUB_HOSTNAME }}/${{ env.REPOSITORY_NAME }}:buildcache
-          cache-to: type=registry,ref=${{ secrets.PRIVATEHUB_HOSTNAME }}/${{ env.REPOSITORY_NAME }}:buildcache,mode=min,compression=zstd
-            
+          #cache-from: type=registry,ref=${{ secrets.PRIVATEHUB_HOSTNAME }}/${{ env.REPOSITORY_NAME }}:buildcache
+          #cache-to: type=registry,ref=${{ secrets.PRIVATEHUB_HOSTNAME }}/${{ env.REPOSITORY_NAME }}:buildcache,mode=min,compression=zstd
+          cache-from: type=local,src=/opt/cache/buildx-cache
+          cache-to: type=local,dest=/opt/cache/buildx-cache-new,mode=max
+      - # Temp fix
+        # https://github.com/docker/build-push-action/issues/252
+        # https://github.com/moby/buildkit/issues/1896
+        name: Move cache
+        run: |
+          rm -rf /opt/cache/buildx-cache
+          mv /opt/cache/buildx-cache-new /opt/cache/buildx-cache           
       - name: Update repo description
         uses: peter-evans/dockerhub-description@v4
         with:
