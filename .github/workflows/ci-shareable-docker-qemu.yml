@@ -96,30 +96,41 @@ jobs:
     #        --debug 
     #        --allow-insecure-entitlement network.host
     #        --allow-insecure-entitlement security.insecure  
+
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /opt/cache/buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-  
             
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
-          build-args: | 
-            ENV=${{ matrix.ENV }}
           platforms: linux/amd64,linux/arm64/v8
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ secrets.PRIVATEHUB_HOSTNAME }}/${{ env.REPOSITORY_NAME }}:buildcache
-          cache-to: type=registry,ref=${{ secrets.PRIVATEHUB_HOSTNAME }}/${{ env.REPOSITORY_NAME }}:buildcache,mode=max
-          #cache-from: type=local,src=/opt/cache/buildx-cache
-          #cache-to: type=local,dest=/opt/cache/buildx-cache-new,mode=max
+          build-args: |
+            ENV=${{ matrix.ENV }}
+            BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+            REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}          
+          # cache-from: type=registry,ref=${{ secrets.PRIVATEHUB_HOSTNAME }}/${{ env.REPOSITORY_NAME }}:buildcache
+          # cache-to: type=registry,ref=${{ secrets.PRIVATEHUB_HOSTNAME }}/${{ env.REPOSITORY_NAME }}:buildcache,mode=max
+          cache-from: type=local,src=/opt/cache/buildx-cache
+          cache-to: type=local,dest=/opt/cache/buildx-cache-new,mode=max
         env:
           SOURCE_DATE_EPOCH: ${{ env.TIMESTAMP }}          
-      ##- # Temp fix
+      - # Temp fix
         # https://github.com/docker/build-push-action/issues/252
         # https://github.com/moby/buildkit/issues/1896
-        ##name: Move cache
-        ##run: |
-        ##  rm -rf /opt/cache/buildx-cache
-        ##  mv /opt/cache/buildx-cache-new /opt/cache/buildx-cache           
+        name: Move cache
+        run: |
+          rm -rf /opt/cache/buildx-cache
+          mv /opt/cache/buildx-cache-new /opt/cache/buildx-cache           
       - name: Update repo description
         uses: peter-evans/dockerhub-description@v4
         with:
