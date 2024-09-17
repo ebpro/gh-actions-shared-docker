@@ -77,6 +77,8 @@ jobs:
           username: ${{ secrets.PRIVATEHUB_USERNAME }}
           password: ${{ secrets.PRIVATEHUB_TOKEN }}                
 
+      - name: Wake up ARM64 node
+        run: ssh-keyscan -H 10.2.248.32 -T 15
       - name: Set up SSH for ARM64
         uses: MrSquaare/ssh-setup-action@2d028b70b5e397cf8314c6eaea229a6c3e34977a # v3.1.0
         with:
